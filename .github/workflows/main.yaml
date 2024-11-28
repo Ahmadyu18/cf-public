@@ -1,0 +1,56 @@
+name: Deploy CloudFormation Template
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  AWS_REGION: us-west-2 # Set your AWS region here
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  validate-and-deploy:
+    name: Validate and Deploy CloudFormation
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up AWS CLI
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v2
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/admin-oidc
+          role-session-name: samplerolesession
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 3: Validate the CloudFormation template
+      - name: Validate CloudFormation Template
+        run: |
+          aws cloudformation validate-template --template-body file://cf.yaml
+
+      # Step 4: Deploy the CloudFormation stack
+      - name: Deploy CloudFormation Stack
+        run: |
+          STACK_NAME="my-cloudformation-stack"
+          PARAMETER_FILE="dev-parameters.json"
+
+
+          aws cloudformation deploy \
+            --template-file cf.yaml \
+            --parameter-overrides $(cat $PARAMETER_FILE | jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"') \
+            --stack-name $STACK_NAME \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
