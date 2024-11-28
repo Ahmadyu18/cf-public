@@ -1,10 +1,15 @@
 name: Deploy CloudFormation Template
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+    workflow_dispatch:
+        input:
+            environment:
+                type: environment
+                required: true
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
 
 env:
   AWS_REGION: us-west-2 # Set your AWS region here
@@ -17,6 +22,8 @@ jobs:
   validate-and-deploy:
     name: Validate and Deploy CloudFormation
     runs-on: ubuntu-latest
+    environment:
+        name: ${{ inputs.environment }}
 
     steps:
       # Step 1: Checkout the code
@@ -46,7 +53,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         run: |
           STACK_NAME="my-cloudformation-stack"
-          PARAMETER_FILE="dev-parameters.json"
+          PARAMETER_FILE="${{env.dev-parameters.json"
 
 
           aws cloudformation deploy \
