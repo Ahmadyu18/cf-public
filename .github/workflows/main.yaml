@@ -53,7 +53,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         run: |
           STACK_NAME="my-cloudformation-stack"
-          PARAMETER_FILE="${{inputs.environment}}.-parameters.json"
+          PARAMETER_FILE="${{inputs.environment}}-parameters.json"
 
 
           aws cloudformation deploy \
