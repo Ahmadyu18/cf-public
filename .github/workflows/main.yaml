@@ -41,7 +41,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
         with:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/admin-oidc
-          role-session-name: samplerolesession
+          role-session-name: samplerolesessions
           aws-region: ${{ env.AWS_REGION }}
 
       # Step 3: Validate the CloudFormation template
